@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SKDA Waste Management - Preview Ikon</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/lucide-react@0.284.0/dist/umd/lucide-react.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            font-weight: 300;
+        }
+        .header p {
+            margin: 10px 0 0 0;
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+        .content {
+            padding: 40px;
+        }
+        .section {
+            margin-bottom: 40px;
+        }
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+        }
+        .icon-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 20px;
+        }
+        .icon-card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        .icon-card:hover {
+            background: #e3f2fd;
+            border-color: #667eea;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.2);
+        }
+        .icon-display {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 60px;
+        }
+        .icon-name {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        .icon-desc {
+            font-size: 0.75rem;
+            color: #666;
+            line-height: 1.3;
+        }
+        .category-icon {
+            width: 40px;
+            height: 40px;
+            margin: 0 auto 10px auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>SKDA Waste Management - Preview Ikon</h1>
+            <p>System Ikon yang Direkomendasikan untuk Manajemen Limbah</p>
+        </div>
+        
+        <div class="content">
+            <div class="section">
+                <h2 class="section-title">🏠 Dashboard & Statistics</h2>
+                <div class="icon-grid" id="dashboard-section"></div>
+            </div>
+            
+            <div class="section">
+                <h2 class="section-title">🗂️ Management Features</h2>
+                <div class="icon-grid" id="management-section"></div>
+            </div>
+            
+            <div class="section">
+                <h2 class="section-title">👥 User Management</h2>
+                <div class="icon-grid" id="user-section"></div>
+            </div>
+            
+            <div class="section">
+                <h2 class="section-title">🗑️ Waste Management</h2>
+                <div class="icon-grid" id="waste-section"></div>
+            </div>
+            
+            <div class="section">
+                <h2 class="section-title">⚙️ Status & Process</h2>
+                <div class="icon-grid" id="status-section"></div>
+            </div>
+            
+            <div class="section">
+                <h2 class="section-title">🎨 Navigation & Utilities</h2>
+                <div class="icon-grid" id="nav-section"></div>
+            </div>
+            
+            <div class="section">
+                <h2 class="section-title">📅 Schedule & Location</h2>
+                <div class="icon-grid" id="location-section"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        
+        // Mock Icon component
+        const Icon = ({ name, size = 24, color = '#333' }) => {
+            const iconMap = {
+                BarChart3: lucide.BarChart3,
+                PieChart: lucide.PieChart,
+                TrendingUp: lucide.TrendingUp,
+                FileText: lucide.FileText,
+                Trash2: lucide.Trash2,
+                Package: lucide.Package,
+                Recycle: lucide.Recycle,
+                Box: lucide.Box,
+                Layers: lucide.Layers,
+                Thermometer: lucide.Thermometer,
+                SortAsc: lucide.SortAsc,
+                Grid: lucide.Grid,
+                List: lucide.List,
+                Users: lucide.Users,
+                UserCheck: lucide.UserCheck,
+                Shield: lucide.Shield,
+                Building2: lucide.Building2,
+                MapPin: lucide.MapPin,
+                Phone: lucide.Phone,
+                Mail: lucide.Mail,
+                Clock: lucide.Clock,
+                CheckCircle: lucide.CheckCircle,
+                XCircle: lucide.XCircle,
+                AlertTriangle: lucide.AlertTriangle,
+                AlertCircle: lucide.AlertCircle,
+                Loader2: lucide.Loader2,
+                RefreshCw: lucide.RefreshCw,
+                PlusCircle: lucide.PlusCircle,
+                Edit: lucide.Edit,
+                Printer: lucide.Printer,
+                Download: lucide.Download,
+                Upload: lucide.Upload,
+                Search: lucide.Search,
+                Filter: lucide.Filter,
+                Menu: lucide.Menu,
+                AlignJustify: lucide.AlignJustify,
+                ChevronLeft: lucide.ChevronLeft,
+                ChevronRight: lucide.ChevronRight,
+                ChevronsLeft: lucide.ChevronsLeft,
+                ChevronsRight: lucide.ChevronsRight,
+                Home: lucide.Home,
+                Settings: lucide.Settings,
+                LogOut: lucide.LogOut,
+                Calendar: lucide.Calendar,
+            };
+            
+            const IconComponent = iconMap[name];
+            if (!IconComponent) return null;
+            
+            return React.createElement(IconComponent, { size, color });
+        };
+        
+        const iconData = [
+            // Dashboard & Statistics
+            { category: 'dashboard', icon: 'BarChart3', label: 'Statistics', desc: 'Dashboard ringkasan statistik' },
+            { category: 'dashboard', icon: 'PieChart', label: 'Categories', desc: 'Diagram pie kategori sampah' },
+            { category: 'dashboard', icon: 'TrendingUp', label: 'Trends', desc: 'Tren dan metrik' },
+            { category: 'dashboard', icon: 'FileText', label: 'Forms', desc: 'Form penyerahan' },
+            
+            // Management Features
+            { category: 'management', icon: 'PlusCircle', label: 'Create Form', desc: 'Buat form penyerahan baru' },
+            { category: 'management', icon: 'Edit', label: 'Edit', desc: 'Edit form' },
+            { category: 'management', icon: 'Trash2', label: 'Delete', desc: 'Hapus form' },
+            { category: 'management', icon: 'Printer', label: 'Print', desc: 'Cetak form A4' },
+            { category: 'management', icon: 'Download', label: 'Export', desc: 'Export ke Excel' },
+            { category: 'management', icon: 'Upload', label: 'Import', desc: 'Import data' },
+            
+            // User Management
+            { category: 'user', icon: 'Users', label: 'Users', desc: 'Daftar pengguna' },
+            { category: 'user', icon: 'UserCheck', label: 'Approval', desc: 'Status approval' },
+            { category: 'user', icon: 'Shield', label: 'Roles', desc: 'Manajemen role' },
+            { category: 'user', icon: 'Building2', label: 'Departments', desc: 'Departemen' },
+            { category: 'user', icon: 'MapPin', label: 'Plants', desc: 'Lokasi plant' },
+            { category: 'user', icon: 'Phone', label: 'Contact', desc: 'Informasi kontak' },
+            { category: 'user', icon: 'Mail', label: 'Email', desc: 'Komunikasi' },
+            
+            // Waste Management
+            { category: 'waste', icon: 'Package', label: 'Categories', desc: 'Kategori sampah' },
+            { category: 'waste', icon: 'Layers', label: 'Sub-items', desc: 'Item di dalam kategori' },
+            { category: 'waste', icon: 'Box', label: 'Containers', desc: 'Container waste' },
+            { category: 'waste', icon: 'Recycle', label: 'Recycling', desc: 'Sistem recycling' },
+            { category: 'waste', icon: 'Thermometer', label: 'Classification', desc: 'Klasifikasi suhu' },
+            { category: 'waste', icon: 'SortAsc', label: 'Sort', desc: 'Urutkan data' },
+            { category: 'waste', icon: 'Grid', label: 'Grid View', desc: 'Tampilan grid' },
+            { category: 'waste', icon: 'List', label: 'List View', desc: 'Tampilan list' },
+            
+            // Status & Process
+            { category: 'status', icon: 'Clock', label: 'Pending', desc: 'Menunggu approval' },
+            { category: 'status', icon: 'CheckCircle', label: 'Approved', desc: 'Disetujui' },
+            { category: 'status', icon: 'XCircle', label: 'Rejected', desc: 'Ditolak' },
+            { category: 'status', icon: 'AlertTriangle', label: 'Warning', desc: 'Peringatan' },
+            { category: 'status', icon: 'AlertCircle', label: 'Error', desc: 'Error terjadi' },
+            { category: 'status', icon: 'Loader2', label: 'Loading', desc: 'Memuat data' },
+            { category: 'status', icon: 'RefreshCw', label: 'Refresh', desc: 'Refresh data' },
+            
+            // Navigation & Utilities
+            { category: 'nav', icon: 'Search', label: 'Search', desc: 'Search data' },
+            { category: 'nav', icon: 'Filter', label: 'Filter', desc: 'Filter data' },
+            { category: 'nav', icon: 'Menu', label: 'Menu', desc: 'Main navigation' },
+            { category: 'nav', icon: 'AlignJustify', label: 'Menu Alt', desc: 'Alternative menu' },
+            { category: 'nav', icon: 'ChevronLeft', label: 'Back', desc: 'Navigasi kembali' },
+            { category: 'nav', icon: 'ChevronRight', label: 'Next', desc: 'Navigasi selanjutnya' },
+            { category: 'nav', icon: 'ChevronsLeft', label: 'First', desc: 'Ke halaman pertama' },
+            { category: 'nav', icon: 'ChevronsRight', label: 'Last', desc: 'Ke halaman terakhir' },
+            { category: 'nav', icon: 'Home', label: 'Home', desc: 'Dashboard beranda' },
+            { category: 'nav', icon: 'Settings', label: 'Settings', desc: 'Pengaturan' },
+            { category: 'nav', icon: 'LogOut', label: 'Logout', desc: 'Keluar aplikasi' },
+            
+            // Schedule & Location
+            { category: 'location', icon: 'Calendar', label: 'Date', desc: 'Picker tanggal' },
+            { category: 'location', icon: 'MapPin', label: 'Location', desc: 'Lokasi plant' },
+            { category: 'location', icon: 'Building2', label: 'Department', desc: 'Detail departemen' },
+        ];
+        
+        function renderIcons() {
+            const sections = {
+                'dashboard': '🏠 Dashboard & Statistics',
+                'management': '🗂️ Management Features',
+                'user': '👥 User Management',
+                'waste': '🗑️ Waste Management',
+                'status': '⚙️ Status & Process',
+                'nav': '🎨 Navigation & Utilities',
+                'location': '📅 Schedule & Location',
+            };
+            
+            Object.keys(sections).forEach(category => {
+                const icons = iconData.filter(item => item.category === category);
+                const container = document.getElementById(`${category}-section`);
+                
+                if (container) {
+                    container.innerHTML = icons.map(icon => `
+                        <div class="icon-card">
+                            <div class="icon-display">
+                                <Icon name="${icon.icon}" size={32} color="#3B82F6" />
+                            </div>
+                            <div class="icon-name">${icon.label}</div>
+                            <div class="icon-desc">${icon.desc}</div>
+                        </div>
+                    `).join('');
+                }
+            });
+        }
+        
+        // Initialize when DOM is ready
+        document.addEventListener('DOMContentLoaded', renderIcons);
+    </script>
+</body>
+</html>

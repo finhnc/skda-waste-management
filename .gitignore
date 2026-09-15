@@ -1,0 +1,51 @@
+# Dependencies
+**/node_modules/
+backend/vendor/
+
+# Environment files
+**/.env
+**/.env.backup
+**/.env.production
+**/.env.*.local
+
+# Build outputs
+frontend/build/
+backend/public/build/
+backend/public/hot/
+backend/public/storage
+
+# SQLite Database
+*.sqlite
+*.sqlite-journal
+*.sqlite-wal
+*.sqlite-shm
+
+# Logs and Caches
+*.log
+backend/storage/logs/*.log
+backend/storage/framework/cache/*
+backend/storage/framework/sessions/*
+backend/storage/framework/views/*
+!backend/storage/framework/cache/.gitignore
+!backend/storage/framework/sessions/.gitignore
+!backend/storage/framework/views/.gitignore
+!backend/storage/logs/.gitignore
+backend/bootstrap/cache/*.php
+
+# IDE & Editor files
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Operating System Files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Backups & Temp
+backups/
+.hermes*
