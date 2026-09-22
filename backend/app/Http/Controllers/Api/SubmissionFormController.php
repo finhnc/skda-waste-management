@@ -35,7 +35,7 @@ class SubmissionFormController extends Controller
                     'period' => $period,
                     'month' => $period,
                     'total_forms' => $forms->count(),
-                    'approved' => $forms->where('status', 'approved')->count(),
+                    'approved' => $forms->whereIn('status', ['approved', 'selesai'])->count(),
                     'pending' => $forms->where('status', 'pending')->count(),
                     'total_weight' => (float) $items->sum('weight_kg'),
                 ];
@@ -50,7 +50,7 @@ class SubmissionFormController extends Controller
             'period_type' => $isDaily ? 'daily' : 'monthly',
             'summary' => [
                 'total_forms' => $forms->count(),
-                'approved' => $forms->where('status', 'approved')->count(),
+                'approved' => $forms->whereIn('status', ['approved', 'selesai'])->count(),
                 'pending' => $forms->where('status', 'pending')->count(),
                 'total_weight' => (float) $items->sum('weight_kg'),
             ],
@@ -73,13 +73,13 @@ class SubmissionFormController extends Controller
             })
             ->when($request->filled('date_from'), fn ($query) => $query->whereDate('submission_date', '>=', $request->date_from))
             ->when($request->filled('date_to'), fn ($query) => $query->whereDate('submission_date', '<=', $request->date_to))
-            ->when($request->filled('status') && in_array($request->status, ['pending', 'approved'], true), fn ($query) => $query->where('status', $request->status))
+            ->when($request->filled('status') && in_array($request->status, ['pending', 'approved'], true), fn ($query) => $request->status === 'approved' ? $query->whereIn('status', ['approved', 'selesai']) : $query->where('status', $request->status))
             ->latest('submission_date');
 
         $statisticsQuery = clone $query;
         $statistics = [
             'total' => (clone $statisticsQuery)->count(),
-            'approved' => (clone $statisticsQuery)->where('status', 'approved')->count(),
+            'approved' => (clone $statisticsQuery)->whereIn('status', ['approved', 'selesai'])->count(),
             'pending' => (clone $statisticsQuery)->where('status', 'pending')->count(),
             'total_weight' => (float) SubmissionItem::whereIn(
                 'submission_form_id',
@@ -188,9 +188,13 @@ class SubmissionFormController extends Controller
     public function approve(Request $request, SubmissionForm $submissionForm): JsonResponse
     {
         $data = $request->validate([
-            'status' => ['required', 'in:approved,rejected'],
+            'status' => ['required', 'in:approved'],
             'notes' => ['nullable', 'string'],
         ]);
+
+        if ($submissionForm->status === 'approved' || $submissionForm->status === 'selesai') {
+            return response()->json(['message' => 'Form sudah disetujui.'], 422);
+        }
 
         $submissionForm->update([
             'status' => $data['status'],
@@ -204,7 +208,25 @@ class SubmissionFormController extends Controller
             'acted_at' => now(),
         ]);
 
-        return response()->json($submissionForm->load('approvals.approver'));
+        return response()->json($submissionForm->load([
+            'plant', 'department', 'creator', 'items.category', 'approvals.approver',
+        ]));
+    }
+
+    public function markAsPrinted(SubmissionForm $submissionForm): JsonResponse
+    {
+        if (!in_array($submissionForm->status, ['approved', 'selesai'], true)) {
+            return response()->json(['message' => 'Form harus disetujui sebelum dapat dicetak.'], 422);
+        }
+
+        $submissionForm->update(['status' => 'selesai']);
+        return response()->json(['message' => 'Form marked as printed', 'status' => 'selesai']);
+    }
+
+    public function cancelPrint(SubmissionForm $submissionForm): JsonResponse
+    {
+        $submissionForm->update(['status' => 'pending']);
+        return response()->json(['message' => 'Form status reverted to pending', 'status' => 'pending']);
     }
 
     private function nextFormNumber(string $date): string

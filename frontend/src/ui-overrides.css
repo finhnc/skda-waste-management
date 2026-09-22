@@ -325,6 +325,28 @@ body {
 
   .signature-grid-two {
     grid-template-columns: repeat(2, 1fr);
+    gap: 40px;
+    align-items: stretch;
+  }
+
+  .signature-grid-two span {
+    position: relative;
+    align-items: center;
+    min-height: 92px;
+    padding-bottom: 22px;
+  }
+
+  .signature-grid-two b {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 70%;
+    min-width: 130px;
+    max-width: 190px;
+    height: 18px;
+    line-height: 18px;
+    white-space: nowrap;
   }
 }
 

@@ -52,4 +52,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Approval::class, 'approver_id');
     }
+
+    public function hasRole(string $role): bool
+    {
+        return $this->role === $role;
+    }
 }

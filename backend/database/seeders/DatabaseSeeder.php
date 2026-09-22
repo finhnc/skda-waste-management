@@ -30,14 +30,15 @@ class DatabaseSeeder extends Seeder
 
         $production = Department::updateOrCreate(
             ['code' => 'PROD'],
-            ['name' => 'Produksi', 'is_active' => true],
+            ['name' => 'GA', 'is_active' => true],
         );
+        Department::where('name', 'Produksi')->update(['name' => 'GA']);
         Department::updateOrCreate(
             ['code' => 'WH'],
             ['name' => 'Gudang', 'is_active' => true],
         );
 
-        foreach (['Kertas', 'Plastik', 'Logam', 'Lainnya'] as $category) {
+        foreach (['Kertas', 'Plastik', 'Logam', 'Lainnya', 'Sampah Organik', 'Sampah Anorganik', 'Sampah Residu'] as $category) {
             WasteCategory::updateOrCreate(
                 ['name' => $category],
                 ['is_active' => true],
@@ -57,7 +58,7 @@ class DatabaseSeeder extends Seeder
         User::updateOrCreate(
             ['email' => 'operator@skda.test'],
             [
-                'name' => 'Budi Santoso',
+                'name' => 'Operator SKDA',
                 'password' => Hash::make('password'),
                 'role' => 'operator',
                 'plant_id' => $plant3->id,

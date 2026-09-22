@@ -15,14 +15,14 @@ class HistoryDemoSeeder extends Seeder
     {
         $operator = User::where('email', 'operator@skda.test')->firstOrFail();
         $plant = Plant::where('code', 'PLANT-3')->firstOrFail();
-        $department = Department::where('code', 'PROD')->firstOrFail();
+        $department = Department::where('code', 'GA')->firstOrFail();
         $categories = WasteCategory::pluck('id', 'name');
         $samples = [
-            ['Kertas', 'Karton Barcode / Label', 'W-001', 'Sak'],
-            ['Kertas', 'Kardus Bekas', 'W-002', 'Sak'],
-            ['Plastik', 'Plastik Wrapping', 'W-003', 'Karung'],
-            ['Logam', 'Potongan Logam', 'W-004', 'Drum'],
-            ['Lainnya', 'Material Campuran', 'W-005', 'Box'],
+            ['Sampah Anorganik', 'Karton Barcode / Label', 'W-001', 'Sak'],
+            ['Sampah Anorganik', 'Kardus Bekas', 'W-002', 'Sak'],
+            ['Sampah Anorganik', 'Plastik Wrapping', 'W-003', 'Karung'],
+            ['Sampah Residu', 'Material Campuran', 'W-005', 'Box'],
+            ['Sampah Organik', 'Sampah Sisa Kantin', 'W-006', 'Tong'],
         ];
 
         for ($index = 1; $index <= 20; $index++) {
