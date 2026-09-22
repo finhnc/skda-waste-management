@@ -1,0 +1,11 @@
+.git
+.github
+.kilo
+backups
+backend/vendor
+backend/.env
+backend/.env.*
+frontend/node_modules
+frontend/build
+*.sqlite
+*.log
