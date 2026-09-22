@@ -77,26 +77,57 @@ class AuthController extends Controller
             return response()->json(['message' => 'Unauthorized.'], 403);
         }
 
-            $data = $request->validate([
-                'name' => ['required', 'string', 'max:255'],
-                'email' => ['required', 'email', 'unique:users,email'],
-                'password' => ['required', 'string', 'min:8'],
-                'role' => ['required', 'in:admin,operator'],
-                'plant_id' => ['required', 'exists:plants,id'],
-                'department_id' => ['required', 'exists:departments,id'],
-            ]);
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'unique:users,email'],
+            'password' => ['required', 'string', 'min:8'],
+            'role' => ['required', 'in:admin,operator'],
+            'plant_id' => ['required', 'exists:plants,id'],
+            'department_id' => ['required', 'exists:departments,id'],
+        ]);
 
-            $user = User::create([
-                'name' => $data['name'],
-                'email' => $data['email'],
-                'password' => Hash::make($data['password']),
-                'role' => $data['role'],
-                'plant_id' => $data['plant_id'],
-                'department_id' => $data['department_id'],
-            ]);
+        $user = User::create([
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'password' => Hash::make($data['password']),
+            'role' => $data['role'],
+            'plant_id' => $data['plant_id'],
+            'department_id' => $data['department_id'],
+        ]);
 
-            return response()->json(['message' => 'User baru.', 'user' => $user], 201);
+        return response()->json(['message' => 'User baru.', 'user' => $user], 201);
+    }
+
+    public function updatePassword(Request $request, User $user): JsonResponse
+    {
+        $currentUser = $request->user();
+
+        // Admin can change any user's password; normal users can only change their own
+        if ($currentUser->role !== 'admin' && $currentUser->id !== $user->id) {
+            return response()->json(['message' => 'Unauthorized.'], 403);
         }
+
+        $rules = [
+            'password' => ['required', 'string', 'min:8'],
+        ];
+
+        // If user is changing their own password and is not admin, verify current password
+        if ($currentUser->id === $user->id && $currentUser->role !== 'admin') {
+            $rules['current_password'] = ['required', 'string'];
+        }
+
+        $data = $request->validate($rules);
+
+        if (isset($data['current_password']) && !Hash::check($data['current_password'], $user->password)) {
+            return response()->json(['message' => 'Password saat ini tidak sesuai.'], 422);
+        }
+
+        $user->update([
+            'password' => Hash::make($data['password']),
+        ]);
+
+        return response()->json(['message' => 'Password berhasil diperbarui.']);
+    }
 
     public function destroy(User $user): JsonResponse
     {

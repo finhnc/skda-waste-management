@@ -11,6 +11,7 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/user', fn (Request $request) => $request->user()->load(['plant', 'department']));
+    Route::put('/users/{user}/password', [AuthController::class, 'updatePassword']);
     Route::get('/reports/submissions', [SubmissionFormController::class, 'report']);
     Route::apiResource('submission-forms', SubmissionFormController::class)->only(['index', 'store', 'show', 'update']);
     Route::patch('/submission-forms/{submissionForm}/approval', [SubmissionFormController::class, 'approve'])->middleware('can:admin');

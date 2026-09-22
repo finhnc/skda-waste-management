@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ArrowLeft, Plus, Users, Shield, UserPlus, CheckCircle, AlertCircle, Trash2 } from 'lucide-react';
+import { ArrowLeft, Plus, Users, Shield, UserPlus, CheckCircle, AlertCircle, Trash2, KeyRound } from 'lucide-react';
 import api from '../api';
 
 export default function UserManagement({ onBack, currentUser }) {
@@ -8,6 +8,9 @@ export default function UserManagement({ onBack, currentUser }) {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [showModal, setShowModal] = useState(false);
+  const [selectedUserForPassword, setSelectedUserForPassword] = useState(null);
+  const [resetPasswordInput, setResetPasswordInput] = useState('');
+  const [resetPasswordLoading, setResetPasswordLoading] = useState(false);
 
   // Form state untuk tambah user baru
   const [formData, setFormData] = useState({
@@ -23,7 +26,6 @@ export default function UserManagement({ onBack, currentUser }) {
     try {
       setLoading(true);
       const res = await api.get('/users');
-      // Jika endpoint mengembalikan data langsung atau dibungkus .data
       setUsers(Array.isArray(res.data) ? res.data : (res.data.data || []));
     } catch (err) {
       setError('Gagal memuat daftar pengguna. Pastikan Anda masuk sebagai Admin.');
@@ -84,6 +86,30 @@ export default function UserManagement({ onBack, currentUser }) {
     }
   };
 
+  const handleResetPassword = async (e) => {
+    e.preventDefault();
+    if (!selectedUserForPassword) return;
+    if (resetPasswordInput.length < 8) {
+      return setError('Password baru minimal 8 karakter.');
+    }
+
+    setError('');
+    setSuccess('');
+    try {
+      setResetPasswordLoading(true);
+      await api.put(`/users/${selectedUserForPassword.id}/password`, {
+        password: resetPasswordInput,
+      });
+      setSuccess(`Password untuk pengguna "${selectedUserForPassword.name}" berhasil diperbarui.`);
+      setSelectedUserForPassword(null);
+      setResetPasswordInput('');
+    } catch (err) {
+      setError(err.response?.data?.message || 'Gagal mereset password pengguna.');
+    } finally {
+      setResetPasswordLoading(false);
+    }
+  };
+
   return (
     <div className="page-wrap">
       <button className="back-link" onClick={onBack} style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px', background: 'none', border: 'none', cursor: 'pointer', color: '#145f3c', fontWeight: 600 }}>
@@ -140,7 +166,26 @@ export default function UserManagement({ onBack, currentUser }) {
                     <td style={{ padding: '16px 20px' }}>{u.plant?.name || 'Plant 3'}</td>
                     <td style={{ padding: '16px 20px' }}>{u.department?.name || 'GA'}</td>
                     <td style={{ padding: '16px 20px', color: '#71827c', fontSize: '13px' }}>{new Date(u.created_at).toLocaleDateString('id-ID')}</td>
-                    <td style={{ padding: '16px 20px', textAlign: 'center' }}>
+                    <td style={{ padding: '16px 20px', textAlign: 'center', whiteSpace: 'nowrap' }}>
+                      <button
+                        onClick={() => setSelectedUserForPassword(u)}
+                        style={{
+                          color: '#145f3c',
+                          background: 'transparent',
+                          border: 'none',
+                          cursor: 'pointer',
+                          padding: '6px',
+                          borderRadius: '6px',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          transition: 'background 0.2s',
+                          marginRight: '8px',
+                        }}
+                        title="Reset password pengguna"
+                      >
+                        <KeyRound size={18} />
+                      </button>
                       <button
                         onClick={() => handleDelete(u.id, u.name)}
                         disabled={currentUser?.id === u.id}
@@ -220,6 +265,58 @@ export default function UserManagement({ onBack, currentUser }) {
               <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
                 <button type="button" onClick={() => setShowModal(false)} style={{ flex: 1, padding: '10px', background: '#f2f7f4', border: '1px solid #d2e0da', borderRadius: '8px', fontWeight: 600, cursor: 'pointer' }}>Batal</button>
                 <button type="submit" style={{ flex: 1, padding: '10px', background: '#145f3c', color: 'white', border: 'none', borderRadius: '8px', fontWeight: 600, cursor: 'pointer' }}>Simpan User</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Reset Password User */}
+      {selectedUserForPassword && (
+        <div className="modal-backdrop" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'grid', placeItems: 'center', zIndex: 1000, padding: '20px' }}>
+          <div className="modal-content" style={{ background: 'white', padding: '30px', borderRadius: '16px', width: '100%', maxWidth: '440px', boxShadow: '0 10px 25px rgba(0,0,0,0.1)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
+              <div style={{ background: '#dcefe5', padding: '8px', borderRadius: '8px', display: 'grid', placeItems: 'center' }}>
+                <KeyRound size={20} color="#145f3c" />
+              </div>
+              <div>
+                <h2 style={{ margin: 0, fontSize: '18px', color: '#173027' }}>Reset Password Pengguna</h2>
+                <small style={{ color: '#65766f' }}>{selectedUserForPassword.name} ({selectedUserForPassword.email})</small>
+              </div>
+            </div>
+
+            <form onSubmit={handleResetPassword} style={{ display: 'grid', gap: '16px' }}>
+              <div style={{ display: 'grid', gap: '6px' }}>
+                <label style={{ fontSize: '12px', fontWeight: 700, color: '#49665a', textTransform: 'uppercase' }}>Password Baru (Min. 8 karakter)</label>
+                <input
+                  type="password"
+                  required
+                  value={resetPasswordInput}
+                  onChange={(e) => setResetPasswordInput(e.target.value)}
+                  placeholder="Masukkan password baru"
+                  style={{ width: '100%', padding: '10px 12px', border: '1px solid #c9dbd2', borderRadius: '8px' }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedUserForPassword(null);
+                    setResetPasswordInput('');
+                  }}
+                  disabled={resetPasswordLoading}
+                  style={{ flex: 1, padding: '10px', background: '#f2f7f4', border: '1px solid #d2e0da', borderRadius: '8px', fontWeight: 600, cursor: 'pointer' }}
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  disabled={resetPasswordLoading}
+                  style={{ flex: 1, padding: '10px', background: '#145f3c', color: 'white', border: 'none', borderRadius: '8px', fontWeight: 600, cursor: 'pointer' }}
+                >
+                  {resetPasswordLoading ? 'Menyimpan...' : 'Simpan Password Baru'}
+                </button>
               </div>
             </form>
           </div>

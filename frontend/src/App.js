@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   ArrowLeft,
   ArrowRight,
@@ -8,6 +8,7 @@ import {
   ClipboardList,
   Eye,
   FileText,
+  KeyRound,
   Leaf,
   LogOut,
   Plus,
@@ -98,8 +99,291 @@ function Login({ onLogin }) {
   </main>;
 }
 
-function Header({ user, onLogout }) {
-  return <header className="topbar"><Brand /><div className="topbar-actions"><span className="context">Plant 3 & 5 · Mojokerto</span><span className="revision">Rev: 01</span><span className="user-chip"><span>{user.name.charAt(0)}</span><strong>{user.name}</strong></span><button className="logout" onClick={onLogout}><LogOut size={15} /> Keluar</button></div></header>;
+function Header({ user, onLogout, onNavigateUsers, onChangePassword }) {
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setDropdownOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  return (
+    <header className="topbar">
+      <Brand />
+      <div className="topbar-actions">
+        <span className="context">Plant 3 & 5 · Mojokerto</span>
+        <span className="revision">Rev: 01</span>
+        
+        <div className="user-dropdown-container" ref={dropdownRef} style={{ position: 'relative' }}>
+          <button 
+            type="button" 
+            className="user-chip-button"
+            onClick={() => setDropdownOpen(!dropdownOpen)}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              background: dropdownOpen ? '#e8f3ec' : '#fff',
+              border: '1px solid #c9dbd2',
+              borderRadius: '24px',
+              padding: '4px 12px 4px 6px',
+              cursor: 'pointer',
+              color: '#173027',
+              transition: 'all 0.2s',
+            }}
+          >
+            <span style={{
+              display: 'grid',
+              placeItems: 'center',
+              background: '#145f3c',
+              borderRadius: '50%',
+              width: '32px',
+              height: '32px',
+              fontWeight: 700,
+              color: 'white',
+              fontSize: '14px',
+            }}>
+              {user.name.charAt(0).toUpperCase()}
+            </span>
+            <div style={{ textAlign: 'left', lineHeight: '1.2' }}>
+              <strong style={{ display: 'block', fontSize: '13px' }}>{user.name}</strong>
+              <small style={{ fontSize: '11px', color: '#65766f', textTransform: 'capitalize' }}>{user.role}</small>
+            </div>
+            <ChevronDown size={14} style={{ marginLeft: '4px', transform: dropdownOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+          </button>
+
+          {dropdownOpen && (
+            <div 
+              className="user-menu-dropdown"
+              style={{
+                position: 'absolute',
+                top: 'calc(100% + 8px)',
+                right: 0,
+                background: 'white',
+                border: '1px solid #d2e0da',
+                borderRadius: '12px',
+                boxShadow: '0 10px 25px rgba(0,0,0,0.12)',
+                minWidth: '220px',
+                zIndex: 1000,
+                overflow: 'hidden',
+                padding: '6px 0',
+              }}
+            >
+              <div style={{ padding: '10px 16px', borderBottom: '1px solid #eef3f0', background: '#fafcfb' }}>
+                <div style={{ fontSize: '11px', fontWeight: 700, color: '#65766f', textTransform: 'uppercase' }}>Akun Pengguna</div>
+                <div style={{ fontSize: '13px', fontWeight: 600, color: '#173027', marginTop: '2px', wordBreak: 'break-all' }}>{user.email}</div>
+              </div>
+
+              {user.role === 'admin' && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDropdownOpen(false);
+                    onNavigateUsers();
+                  }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    width: '100%',
+                    padding: '10px 16px',
+                    background: 'none',
+                    border: 'none',
+                    textAlign: 'left',
+                    color: '#173027',
+                    fontSize: '13px',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = '#f0f7f3')}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = 'none')}
+                >
+                  <Users size={16} color="#145f3c" />
+                  Manajemen Pengguna
+                </button>
+              )}
+
+              <button
+                type="button"
+                onClick={() => {
+                  setDropdownOpen(false);
+                  onChangePassword();
+                }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  width: '100%',
+                  padding: '10px 16px',
+                  background: 'none',
+                  border: 'none',
+                  textAlign: 'left',
+                  color: '#173027',
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = '#f0f7f3')}
+                onMouseLeave={(e) => (e.currentTarget.style.background = 'none')}
+              >
+                <KeyRound size={16} color="#145f3c" />
+                Ubah Password
+              </button>
+
+              <div style={{ height: '1px', background: '#eef3f0', margin: '4px 0' }} />
+
+              <button
+                type="button"
+                onClick={() => {
+                  setDropdownOpen(false);
+                  onLogout();
+                }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  width: '100%',
+                  padding: '10px 16px',
+                  background: 'none',
+                  border: 'none',
+                  textAlign: 'left',
+                  color: '#dc2626',
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = '#fef2f2')}
+                onMouseLeave={(e) => (e.currentTarget.style.background = 'none')}
+              >
+                <LogOut size={16} color="#dc2626" />
+                Keluar (Logout)
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    </header>
+  );
+}
+
+function ChangePasswordModal({ user, onClose, onSuccess }) {
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setError('');
+
+    if (newPassword.length < 8) {
+      return setError('Password baru minimal 8 karakter.');
+    }
+    if (newPassword !== confirmPassword) {
+      return setError('Konfirmasi password tidak cocok.');
+    }
+
+    try {
+      setLoading(true);
+      const payload = {
+        password: newPassword,
+      };
+      if (user.role !== 'admin') {
+        payload.current_password = currentPassword;
+      }
+
+      await api.put(`/users/${user.id}/password`, payload);
+      onSuccess('Password Anda berhasil diperbarui!');
+      onClose();
+    } catch (err) {
+      setError(err.response?.data?.message || 'Gagal mengubah password. Silakan coba lagi.');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className="modal-backdrop" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'grid', placeItems: 'center', zIndex: 1100, padding: '20px' }}>
+      <div className="modal-content" style={{ background: 'white', padding: '30px', borderRadius: '16px', width: '100%', maxWidth: '420px', boxShadow: '0 10px 25px rgba(0,0,0,0.1)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
+          <div style={{ background: '#dcefe5', padding: '8px', borderRadius: '8px', display: 'grid', placeItems: 'center' }}>
+            <KeyRound size={20} color="#145f3c" />
+          </div>
+          <div>
+            <h2 style={{ margin: 0, fontSize: '18px', color: '#173027' }}>Ubah Password</h2>
+            <small style={{ color: '#65766f' }}>Akun: {user.email}</small>
+          </div>
+        </div>
+
+        {error && <div style={{ background: '#fee2e2', color: '#991b1b', padding: '10px 12px', borderRadius: '8px', marginBottom: '16px', fontSize: '13px' }}>{error}</div>}
+
+        <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '14px' }}>
+          {user.role !== 'admin' && (
+            <div style={{ display: 'grid', gap: '6px' }}>
+              <label style={{ fontSize: '12px', fontWeight: 700, color: '#49665a', textTransform: 'uppercase' }}>Password Saat Ini</label>
+              <input
+                type="password"
+                required
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                placeholder="••••••••"
+                style={{ width: '100%', padding: '10px 12px', border: '1px solid #c9dbd2', borderRadius: '8px' }}
+              />
+            </div>
+          )}
+
+          <div style={{ display: 'grid', gap: '6px' }}>
+            <label style={{ fontSize: '12px', fontWeight: 700, color: '#49665a', textTransform: 'uppercase' }}>Password Baru (Min. 8 karakter)</label>
+            <input
+              type="password"
+              required
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              placeholder="••••••••"
+              style={{ width: '100%', padding: '10px 12px', border: '1px solid #c9dbd2', borderRadius: '8px' }}
+            />
+          </div>
+
+          <div style={{ display: 'grid', gap: '6px' }}>
+            <label style={{ fontSize: '12px', fontWeight: 700, color: '#49665a', textTransform: 'uppercase' }}>Konfirmasi Password Baru</label>
+            <input
+              type="password"
+              required
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder="••••••••"
+              style={{ width: '100%', padding: '10px 12px', border: '1px solid #c9dbd2', borderRadius: '8px' }}
+            />
+          </div>
+
+          <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={loading}
+              style={{ flex: 1, padding: '10px', background: '#f2f7f4', border: '1px solid #d2e0da', borderRadius: '8px', fontWeight: 600, cursor: 'pointer' }}
+            >
+              Batal
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              style={{ flex: 1, padding: '10px', background: '#145f3c', color: 'white', border: 'none', borderRadius: '8px', fontWeight: 600, cursor: 'pointer' }}
+            >
+              {loading ? 'Menyimpan...' : 'Simpan Password'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
 }
 
 function StatCard({ label, value, hint, tone = '' }) {
@@ -257,7 +541,19 @@ export default function App() {
   const savedUrlState = new URLSearchParams(window.location.search);
   const initialFilters = { search: savedUrlState.get('search') || '', date_from: savedUrlState.get('date_from') || '', date_to: savedUrlState.get('date_to') || '', status: savedUrlState.get('status') || '' };
   const initialPage = Number(savedUrlState.get('page')) || 1;
-  const [user, setUser] = useState(null); const [forms, setForms] = useState([]); const [statistics, setStatistics] = useState({ total: 0, approved: 0, pending: 0, total_weight: 0 }); const [pagination, setPagination] = useState({ current_page: initialPage, last_page: 1, total: 0, from: 0, to: 0 }); const [filters, setFilters] = useState(initialFilters); const [screen, setScreen] = useState('dashboard'); const [selected, setSelected] = useState(null); const [loading, setLoading] = useState(false); const [booting, setBooting] = useState(true); const [loadError, setLoadError] = useState('');
+  const [user, setUser] = useState(null);
+  const [forms, setForms] = useState([]);
+  const [statistics, setStatistics] = useState({ total: 0, approved: 0, pending: 0, total_weight: 0 });
+  const [pagination, setPagination] = useState({ current_page: initialPage, last_page: 1, total: 0, from: 0, to: 0 });
+  const [filters, setFilters] = useState(initialFilters);
+  const [screen, setScreen] = useState('dashboard');
+  const [selected, setSelected] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [booting, setBooting] = useState(true);
+  const [loadError, setLoadError] = useState('');
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [appSuccessMessage, setAppSuccessMessage] = useState('');
+
   async function loadForms(nextFilters = filters, page = 1) {
     const params = { ...nextFilters, page, per_page: 10 };
     const response = await api.get('/submission-forms', { params });
@@ -287,14 +583,69 @@ export default function App() {
   async function handleSave(payload) { const response = await api.post('/submission-forms', payload); setForms((current) => [mapForm(response.data), ...current]); setScreen('dashboard'); }
   async function handleUpdate(payload) { const response = await api.put(`/submission-forms/${selected.raw.id}`, payload); const updated = mapForm(response.data); setForms((current) => current.map((form) => form.raw.id === updated.raw.id ? updated : form)); setSelected(updated); setScreen('detail'); }
   function handleApprovalChange(updated) { setSelected(updated); setForms((current) => current.map((form) => form.raw.id === updated.raw.id ? updated : form)); }
+
+  const handleShowSuccess = (msg) => {
+    setAppSuccessMessage(msg);
+    setTimeout(() => setAppSuccessMessage(''), 5000);
+  };
+
   if (booting) return <LoadingScreen message="Memulihkan sesi..." />;
   if (!user) return <Login onLogin={handleLogin} />;
-  if (screen === 'new') return <><Header user={user} onLogout={handleLogout} /><SubmissionForm onBack={() => setScreen('dashboard')} onSaved={handleSave} /></>;
-  if (screen === 'edit') return <><Header user={user} onLogout={handleLogout} /><SubmissionForm initialForm={selected} onBack={() => setScreen('detail')} onSaved={handleUpdate} /></>;
-  if (screen === 'detail') return <><Header user={user} onLogout={handleLogout} /><Detail form={selected} onBack={() => setScreen('dashboard')} onEdit={() => setScreen('edit')} onApprovalChange={handleApprovalChange} currentUser={user} /></>;
-  if (screen === 'report') return <><Header user={user} onLogout={handleLogout} /><Report onBack={() => setScreen('dashboard')} /></>;
-  if (screen === 'users') return <><Header user={user} onLogout={handleLogout} /><UserManagement onBack={() => setScreen('dashboard')} currentUser={user} /></>;
-    return <><Header user={user} onLogout={handleLogout} />{loading ? <LoadingScreen message="Memuat data form..." /> : <><Dashboard forms={forms} statistics={statistics} pagination={pagination} filters={filters} onFilter={(nextFilters) => { setFilters(nextFilters); loadForms(nextFilters, 1); }} onPageChange={(page) => loadForms(filters, page)} onNew={() => setScreen('new')} onReport={() => setScreen('report')} onManageUsers={() => setScreen('users')} onDetail={(form) => { setSelected(form); setScreen('detail'); }} />{loadError && <div className="error-text">{loadError}</div>}</>}</>;
+
+  return (
+    <>
+      <Header
+        user={user}
+        onLogout={handleLogout}
+        onNavigateUsers={() => setScreen('users')}
+        onChangePassword={() => setShowPasswordModal(true)}
+      />
+
+      {appSuccessMessage && (
+        <div style={{ maxWidth: '1220px', margin: '16px auto 0', padding: '0 28px' }}>
+          <div style={{ background: '#d4edda', color: '#155724', padding: '12px 16px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600, border: '1px solid #c3e6cb' }}>
+            <Check size={18} /> {appSuccessMessage}
+          </div>
+        </div>
+      )}
+
+      {showPasswordModal && (
+        <ChangePasswordModal
+          user={user}
+          onClose={() => setShowPasswordModal(false)}
+          onSuccess={handleShowSuccess}
+        />
+      )}
+
+      {screen === 'new' && <SubmissionForm onBack={() => setScreen('dashboard')} onSaved={handleSave} />}
+      {screen === 'edit' && <SubmissionForm initialForm={selected} onBack={() => setScreen('detail')} onSaved={handleUpdate} />}
+      {screen === 'detail' && <Detail form={selected} onBack={() => setScreen('dashboard')} onEdit={() => setScreen('edit')} onApprovalChange={handleApprovalChange} currentUser={user} />}
+      {screen === 'report' && <Report onBack={() => setScreen('dashboard')} />}
+      {screen === 'users' && <UserManagement onBack={() => setScreen('dashboard')} currentUser={user} />}
+      {screen === 'dashboard' && (
+        loading ? (
+          <LoadingScreen message="Memuat data form..." />
+        ) : (
+          <>
+            <Dashboard
+              forms={forms}
+              statistics={statistics}
+              pagination={pagination}
+              filters={filters}
+              currentUser={user}
+              onFilter={(nextFilters) => { setFilters(nextFilters); loadForms(nextFilters, 1); }}
+              onPageChange={(page) => loadForms(filters, page)}
+              onNew={() => setScreen('new')}
+              onReport={() => setScreen('report')}
+              onManageUsers={() => setScreen('users')}
+              onDetail={(form) => { setSelected(form); setScreen('detail'); }}
+            />
+            {loadError && <div className="error-text">{loadError}</div>}
+          </>
+        )
+      )}
+    </>
+  );
 }
 
 const REPORT_MONTHS = [
