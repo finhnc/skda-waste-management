@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ArrowLeft, Plus, Users, Shield, UserPlus, CheckCircle, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Plus, Users, Shield, UserPlus, CheckCircle, AlertCircle, Trash2 } from 'lucide-react';
 import api from '../api';
 
 export default function UserManagement({ onBack, currentUser }) {
@@ -69,6 +69,21 @@ export default function UserManagement({ onBack, currentUser }) {
     }
   };
 
+  const handleDelete = async (userId, userName) => {
+    if (!window.confirm(`Yakin ingin menghapus pengguna "${userName}"? Tindakan ini tidak dapat dibatalkan.`)) {
+      return;
+    }
+    setError('');
+    setSuccess('');
+    try {
+      await api.delete(`/users/${userId}`);
+      setSuccess(`Pengguna "${userName}" berhasil dihapus.`);
+      loadUsers();
+    } catch (err) {
+      setError(err.response?.data?.message || 'Gagal menghapus pengguna.');
+    }
+  };
+
   return (
     <div className="page-wrap">
       <button className="back-link" onClick={onBack} style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px', background: 'none', border: 'none', cursor: 'pointer', color: '#145f3c', fontWeight: 600 }}>
@@ -104,13 +119,14 @@ export default function UserManagement({ onBack, currentUser }) {
                 <th style={{ padding: '16px 20px' }}>Plant</th>
                 <th style={{ padding: '16px 20px' }}>Departemen</th>
                 <th style={{ padding: '16px 20px' }}>Dibuat Pada</th>
+                <th style={{ padding: '16px 20px', textAlign: 'center' }}>Aksi</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan="6" style={{ textAlign: 'center', padding: '40px', color: '#71827c' }}>Memuat data pengguna...</td></tr>
+                <tr><td colSpan="7" style={{ textAlign: 'center', padding: '40px', color: '#71827c' }}>Memuat data pengguna...</td></tr>
               ) : users.length === 0 ? (
-                <tr><td colSpan="6" style={{ textAlign: 'center', padding: '40px', color: '#71827c' }}>Tidak ada pengguna ditemukan.</td></tr>
+                <tr><td colSpan="7" style={{ textAlign: 'center', padding: '40px', color: '#71827c' }}>Tidak ada pengguna ditemukan.</td></tr>
               ) : (
                 users.map((u) => (
                   <tr key={u.id} style={{ borderBottom: '1px solid #e4eee9' }}>
@@ -124,6 +140,27 @@ export default function UserManagement({ onBack, currentUser }) {
                     <td style={{ padding: '16px 20px' }}>{u.plant?.name || 'Plant 3'}</td>
                     <td style={{ padding: '16px 20px' }}>{u.department?.name || 'GA'}</td>
                     <td style={{ padding: '16px 20px', color: '#71827c', fontSize: '13px' }}>{new Date(u.created_at).toLocaleDateString('id-ID')}</td>
+                    <td style={{ padding: '16px 20px', textAlign: 'center' }}>
+                      <button
+                        onClick={() => handleDelete(u.id, u.name)}
+                        disabled={currentUser?.id === u.id}
+                        style={{
+                          color: currentUser?.id === u.id ? '#9ca3af' : '#dc2626',
+                          background: 'transparent',
+                          border: 'none',
+                          cursor: currentUser?.id === u.id ? 'not-allowed' : 'pointer',
+                          padding: '6px',
+                          borderRadius: '6px',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          transition: 'background 0.2s',
+                        }}
+                        title={currentUser?.id === u.id ? 'Tidak dapat menghapus akun sendiri' : 'Hapus pengguna'}
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                    </td>
                   </tr>
                 ))
               )}

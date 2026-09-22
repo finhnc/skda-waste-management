@@ -1,0 +1,121 @@
+================================================================================
+          PANDUAN LENGKAP PENGEMBANGAN SKDA WASTE MANAGEMENT
+         Alur: Dari Laptop (VS Code) -> GitHub -> Server Linux (Docker)
+================================================================================
+
+Server Linux: 192.168.160.181
+Port Aplikasi: 8081 (http://192.168.160.181:8081)
+Akun Default: operator@skda.test (Password: password)
+
+--------------------------------------------------------------------------------
+GAMBARAN UMUM ALUR KERJA
+--------------------------------------------------------------------------------
+1. LAPTOP ANDA       : Tempat Anda mengetik kode dan uji coba di browser lokal.
+2. GITHUB            : Tempat penyimpanan kode online (penghubung).
+3. SERVER LINUX      : Tempat aplikasi berjalan di Docker untuk pengguna kantor.
+
+Alur ringkas:
+[Coding di Laptop] -> [git push ke GitHub] -> [git pull di Server Linux]
+
+
+================================================================================
+LANGKAH 1: SAAT MEMBUAT FITUR / EDIT KODE DI LAPTOP
+================================================================================
+1. Buka project di VS Code.
+2. Jalankan server lokal untuk tes (buka 2 Terminal di VS Code):
+   - Terminal 1 (Backend) :
+       cd backend
+       php artisan serve
+
+   - Terminal 2 (Frontend) :
+       cd frontend
+       npm start
+
+3. Buka browser di laptop: http://localhost:3000
+4. Edit kode sesuai kebutuhan Anda. Tampilan di browser akan otomatis berubah 
+   setiap kali Anda menyimpan (Ctrl + S) file.
+
+
+================================================================================
+LANGKAH 2: KIRIM PERUBAHAN DARI LAPTOP KE GITHUB
+================================================================================
+Setelah fitur selesai diuji dan berjalan normal di laptop Anda:
+
+1. Buka Terminal di VS Code (di folder utama project).
+2. Jalankan perintah berikut secara berurutan:
+
+   git add backend/ frontend/
+   git commit -m "feat: tulis catatan perubahan apa yang dibuat"
+   git push origin main
+
+Selesai, kode terbaru Anda sekarang sudah tersimpan aman di GitHub!
+
+
+================================================================================
+LANGKAH 3: UPDATE APLIKASI DI SERVER LINUX
+================================================================================
+Agar perubahan yang Anda buat di laptop langsung terpasang di server kantor:
+
+1. Masuk ke Server Linux via SSH dari Command Prompt / Terminal:
+   ssh agent@192.168.160.181
+
+2. Masuk ke folder project di server:
+   cd /opt/skda-waste-management
+
+3. Ambil kode terbaru dari GitHub dan rebuild container:
+   git pull origin main
+   docker compose up -d --build
+
+4. (Opsional) Jika Anda membuat tabel database baru di Laravel:
+   docker compose exec backend php artisan migrate --force
+
+5. Selesai! Buka browser di:
+   http://192.168.160.181:8081
+   (Tekan Ctrl + F5 di browser agar halaman memuat tampilan paling baru).
+
+
+================================================================================
+TIPS CEPAT: UPDATE SEKALI KLIK DI SERVER LINUX
+================================================================================
+Supaya tidak perlu mengetik banyak perintah di server setiap kali update:
+
+1. Buat file script otomatis di server (cukup jalankan ini sekali saja di server):
+   
+   cat << 'EOF' > /opt/skda-waste-management/update.sh
+   #!/bin/bash
+   set -e
+   echo "1/4 Mengambil kode terbaru dari GitHub..."
+   git pull origin main
+
+   echo "2/4 Memperbarui container Docker..."
+   docker compose up -d --build
+
+   echo "3/4 Menjalankan migrasi database..."
+   docker compose exec -T backend php artisan migrate --force
+
+   echo "4/4 Membersihkan cache..."
+   docker compose exec -T backend php artisan optimize:clear
+
+   echo "SELESAI! Buka http://192.168.160.181:8081"
+   EOF
+
+   chmod +x /opt/skda-waste-management/update.sh
+
+2. Ke depannya, setiap kali Anda mau update server, cukup ketik 1 baris ini di server:
+   cd /opt/skda-waste-management && ./update.sh
+
+
+================================================================================
+RINGKASAN PERINTAH CEPAT (CHEATSHEET)
+================================================================================
+Di Laptop (PowerShell VS Code):
+- Simpan & Kirim : git add backend/ frontend/
+                   git commit -m "pesan perubahan"
+                   git push origin main
+
+Di Server Linux (SSH):
+- Update Cepat   : cd /opt/skda-waste-management && ./update.sh
+- Cek Status     : docker compose ps
+- Lihat Log      : docker compose logs -f backend
+
+================================================================================

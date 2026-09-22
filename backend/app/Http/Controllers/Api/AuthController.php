@@ -71,11 +71,11 @@ class AuthController extends Controller
         return response()->json(User::with(['plant', 'department'])->get());
     }
 
-        public function store(Request $request): JsonResponse
-        {
-            if ($request->user()->role !== 'admin') {
-                return response()->json(['message' => 'Unauthorized.'], 403);
-            }
+    public function store(Request $request): JsonResponse
+    {
+        if ($request->user()->role !== 'admin') {
+            return response()->json(['message' => 'Unauthorized.'], 403);
+        }
 
             $data = $request->validate([
                 'name' => ['required', 'string', 'max:255'],
@@ -97,4 +97,21 @@ class AuthController extends Controller
 
             return response()->json(['message' => 'User baru.', 'user' => $user], 201);
         }
+
+    public function destroy(User $user): JsonResponse
+    {
+        $currentUser = auth()->user();
+        if ($currentUser->role !== 'admin') {
+            return response()->json(['message' => 'Unauthorized.'], 403);
+        }
+
+        if ($user->id === $currentUser->id) {
+            return response()->json(['message' => 'Anda tidak dapat menghapus akun Anda sendiri.'], 403);
+        }
+
+        $user->tokens()->delete();
+        $user->delete();
+
+        return response()->json(['message' => 'Pengguna berhasil dihapus.'], 200);
+    }
 }
