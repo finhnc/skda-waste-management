@@ -14,8 +14,8 @@
 }
 
 .form-meta {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  column-gap: 18px;
+  grid-template-columns: 1fr;
+  row-gap: 14px;
 }
 
 .form-meta > label {
